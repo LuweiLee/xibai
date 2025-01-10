@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洗白聊天室</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .text-container {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        .main-text {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sub-text {
+            font-size: 2rem;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-text {
+                font-size: 3rem;
+            }
+            .sub-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <div class="main-text">问题不大！</div>
+        <div class="sub-text"><a href="/chat.html" style="color: white; text-decoration: none;">进来聊聊天吧！</a></div>
+    </div>
+</body>
+</html>
