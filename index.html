@@ -3,63 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>洗白聊天室</title>
+    <title>聊天室</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            flex-direction: column;
         }
-
-        .text-container {
+        #nickname-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #nickname-form {
+            background: #2a2a4a;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
+        }
+        #chat-container {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #user-list {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+            display: none;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        #toggle-users {
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
             color: white;
-            padding: 2rem;
-            animation: fadeIn 1.5s ease-in;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 101;
         }
-
-        .main-text {
-            font-size: 4rem;
+        #toggle-users:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        #toggle-users .user-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        #messages {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            position: relative;
+        }
+        .message .time {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+        .message .nickname {
             font-weight: bold;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 5px;
         }
-
-        .sub-text {
-            font-size: 2rem;
-            opacity: 0.9;
+        #input-container {
+            display: flex;
+            gap: 10px;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #emoji-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 0 15px;
+            cursor: pointer;
+            font-size: 1.2em;
         }
-
+        #emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #2a2a4a;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .emoji {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.5em;
+        }
+        input, button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        button {
+            background: #ff9966;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #ff5e62;
+        }
+        #message-input {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* 移动端适配 */
         @media (max-width: 768px) {
-            .main-text {
-                font-size: 3rem;
+            body {
+                padding: 10px;
             }
-            .sub-text {
-                font-size: 1.5rem;
+            #chat-container {
+                height: calc(100vh - 20px);
+            }
+            #chat-main {
+                flex: 1;
+            }
+            #user-list {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                top: auto;
+                width: 100%;
+                height: 180px;
+                padding: 10px;
+            }
+            #users {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            #users div {
+                flex: 0 1 auto;
+                padding: 5px 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 5px;
+            }
+            #input-container {
+                gap: 5px;
+            }
+            #emoji-btn {
+                padding: 0 10px;
+            }
+            button {
+                padding: 8px 12px;
+            }
+            #message-input {
+                padding: 8px;
+            }
+            #messages {
+                padding: 10px;
+            }
+            .message {
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+            #emoji-picker {
+                right: 0;
+                left: auto;
+            }
+        }
+        #logout-btn {
+            position: fixed;
+            right: 20px;
+            top: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 101;
+        }
+        #logout-btn:hover {
+            background: rgba(255, 0, 0, 0.2);
+        }
+        @media (max-width: 768px) {
+            #logout-btn {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="text-container">
-        <div class="main-text">问题不大！</div>
-        <div class="sub-text"><a href="/chat.html" style="color: white; text-decoration: none;">进来聊聊天吧！</a></div>
+    <div id="nickname-modal">
+        <form id="nickname-form">
+            <h2>请输入你的昵称</h2>
+            <input type="text" id="nickname-input" required>
+            <button type="submit">进入聊天室</button>
+        </form>
     </div>
+
+    <div id="chat-container">
+        <div id="chat-main">
+            <div id="messages"></div>
+            <div id="input-container">
+                <button id="emoji-btn">😊</button>
+                <div id="emoji-picker"></div>
+                <input type="text" id="message-input" placeholder="输入消息...">
+                <button onclick="sendMessage(event)">发送</button>
+            </div>
+        </div>
+        <button id="toggle-users">
+            在线用户 <span class="user-count">0</span>
+        </button>
+        <div id="user-list">
+            <h3>在线用户</h3>
+            <div id="users"></div>
+        </div>
+    </div>
+
+    <button id="logout-btn">退出</button>
+
+    <audio id="message-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let nickname = localStorage.getItem('chatNickname') || '';
+        const messageSound = document.getElementById('message-sound');
+        const emojis = ['😊', '😂', '🤣', '❤️', '👍', '🎉', '🌟', '🤔', '😎', '🥳'];
+        
+        // 如果有保存的昵称，直接进入聊天室
+        if (nickname) {
+            document.getElementById('chat-container').style.display = 'flex';
+            document.getElementById('nickname-modal').style.display = 'none';
+            socket.emit('join', nickname);
+        }
+
+        function initEmojiPicker() {
+            const emojiPicker = document.getElementById('emoji-picker');
+            emojis.forEach(emoji => {
+                const span = document.createElement('span');
+                span.className = 'emoji';
+                span.textContent = emoji;
+                span.onclick = () => {
+                    document.getElementById('message-input').value += emoji;
+                    emojiPicker.style.display = 'none';
+                };
+                emojiPicker.appendChild(span);
+            });
+
+            document.getElementById('emoji-btn').onclick = () => {
+                emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+            };
+        }
+
+        function setNickname() {
+            const nicknameInput = document.getElementById('nickname-input');
+            nickname = nicknameInput.value.trim();
+            if (nickname) {
+                // 保存昵称到本地存储
+                localStorage.setItem('chatNickname', nickname);
+                document.getElementById('chat-container').style.display = 'flex';
+                document.getElementById('nickname-modal').style.display = 'none';
+                socket.emit('join', nickname);
+            }
+        }
+
+        function sendMessage(event) {
+            event.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.emit('chat message', {
+                    nickname: nickname,
+                    message: message
+                });
+                messageInput.value = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('chatNickname');
+            nickname = '';
+            document.getElementById('chat-container').style.display = 'none';
+            document.getElementById('nickname-modal').style.display = 'flex';
+            document.getElementById('nickname-input').value = '';
+            socket.emit('disconnect');
+            // 重新连接以确保清理旧的连接状态
+            socket.connect();
+        }
+
+        document.getElementById('logout-btn').onclick = logout;
+
+        socket.on('chat message', function(data) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `
+                <div class="time">${data.time}</div>
+                <div class="nickname">${data.nickname}:</div>
+                <div class="content">${data.message}</div>
+            `;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            if (data.nickname !== 'System' && data.nickname !== nickname) {
+                messageSound.play();
+            }
+        });
+
+        socket.on('update users', function(userList) {
+            const usersDiv = document.getElementById('users');
+            const userCount = document.querySelector('#toggle-users .user-count');
+            usersDiv.innerHTML = '';
+            userCount.textContent = userList.length;
+            userList.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.textContent = user;
+                usersDiv.appendChild(userElement);
+            });
+        });
+
+        // 添加用户列表显示切换功能
+        document.getElementById('toggle-users').addEventListener('click', function() {
+            const userList = document.getElementById('user-list');
+            const isVisible = userList.style.display === 'block';
+            userList.style.display = isVisible ? 'none' : 'block';
+        });
+
+        // 点击用户列表外部时隐藏
+        document.addEventListener('click', function(event) {
+            const userList = document.getElementById('user-list');
+            const toggleBtn = document.getElementById('toggle-users');
+            if (!userList.contains(event.target) && !toggleBtn.contains(event.target)) {
+                userList.style.display = 'none';
+            }
+        });
+
+        document.getElementById('nickname-form').onsubmit = (event) => {
+            event.preventDefault();
+            setNickname();
+        };
+
+        initEmojiPicker();
+    </script>
 </body>
 </html>
